@@ -57,29 +57,84 @@ local function makeDraggable(frame, dragHandle)
 	end)
 end
 
+local function applyGradient(element, color1, color2)
+	local gradient = Instance.new("UIGradient")
+	gradient.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, color1),
+		ColorSequenceKeypoint.new(0.5, color2),
+		ColorSequenceKeypoint.new(1, color1)
+	}
+	gradient.Parent = element
+	
+	task.spawn(function()
+		while element and element.Parent do
+			for i = 0, 1, 0.01 do
+				if not element or not element.Parent then break end
+				gradient.Offset = Vector2.new(i, 0)
+				task.wait(0.03)
+			end
+			for i = 1, 0, -0.01 do
+				if not element or not element.Parent then break end
+				gradient.Offset = Vector2.new(i, 0)
+				task.wait(0.03)
+			end
+		end
+	end)
+	
+	return gradient
+end
+
 function CatLib:CreateWindow(config)
 	local window = {}
 	
 	local colorThemes = {
-		Blue = Color3.fromRGB(13, 105, 172),
-		Red = Color3.fromRGB(96, 40, 28),
-		Yellow = Color3.fromRGB(245, 205, 48),
-		Green = Color3.fromRGB(107, 50, 124),
-		Purple = Color3.fromRGB(142, 66, 133),
-		Orange = Color3.fromRGB(218, 133, 65),
-		Brown = Color3.fromRGB(105, 64, 40),
-		Grey = Color3.fromRGB(137, 135, 136)
+		Blue = {
+			primary = Color3.fromRGB(13, 105, 172),
+			secondary = Color3.fromRGB(30, 144, 255)
+		},
+		Red = {
+			primary = Color3.fromRGB(96, 40, 28),
+			secondary = Color3.fromRGB(220, 20, 60)
+		},
+		Yellow = {
+			primary = Color3.fromRGB(245, 205, 48),
+			secondary = Color3.fromRGB(255, 215, 0)
+		},
+		Green = {
+			primary = Color3.fromRGB(107, 50, 124),
+			secondary = Color3.fromRGB(144, 238, 144)
+		},
+		Purple = {
+			primary = Color3.fromRGB(142, 66, 133),
+			secondary = Color3.fromRGB(186, 85, 211)
+		},
+		Orange = {
+			primary = Color3.fromRGB(218, 133, 65),
+			secondary = Color3.fromRGB(255, 165, 0)
+		},
+		Brown = {
+			primary = Color3.fromRGB(105, 64, 40),
+			secondary = Color3.fromRGB(139, 90, 43)
+		},
+		Grey = {
+			primary = Color3.fromRGB(137, 135, 136),
+			secondary = Color3.fromRGB(192, 192, 192)
+		},
+		SpecialCat = {
+			primary = Color3.fromRGB(255, 223, 0),
+			secondary = Color3.fromRGB(255, 165, 0)
+		}
 	}
 	
 	local themeColor = Color3.fromRGB(255, 255, 255)
-	local isSpecialCat = false
+	local themeColorSecondary = Color3.fromRGB(255, 255, 255)
+	local isGradientTheme = false
 	
 	if config.Theme then
-		if config.Theme == "SpecialCat" then
-			isSpecialCat = true
-			themeColor = Color3.fromRGB(200, 150, 50)
-		elseif colorThemes[config.Theme] then
-			themeColor = colorThemes[config.Theme]
+		if colorThemes[config.Theme] then
+			themeColor = colorThemes[config.Theme].primary
+			themeColorSecondary = colorThemes[config.Theme].secondary
+			isGradientTheme = true
 		end
 	end
 	
@@ -195,52 +250,9 @@ function CatLib:CreateWindow(config)
 	runningTime.ZIndex = 2
 	runningTime.Parent = header
 	
-	if isSpecialCat then
-		local titleGradient = Instance.new("UIGradient")
-		titleGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 223, 0)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 165, 0)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 223, 0))
-		}
-		titleGradient.Parent = titleLabel
-		
-		task.spawn(function()
-			while titleLabel and titleLabel.Parent do
-				for i = 0, 1, 0.01 do
-					if not titleLabel or not titleLabel.Parent then break end
-					titleGradient.Offset = Vector2.new(i, 0)
-					task.wait(0.03)
-				end
-				for i = 1, 0, -0.01 do
-					if not titleLabel or not titleLabel.Parent then break end
-					titleGradient.Offset = Vector2.new(i, 0)
-					task.wait(0.03)
-				end
-			end
-		end)
-		
-		local fpsGradient = Instance.new("UIGradient")
-		fpsGradient.Color = ColorSequence.new{
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 223, 0)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 165, 0)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 223, 0))
-		}
-		fpsGradient.Parent = fpsCounter
-		
-		task.spawn(function()
-			while fpsCounter and fpsCounter.Parent do
-				for i = 0, 1, 0.01 do
-					if not fpsCounter or not fpsCounter.Parent then break end
-					fpsGradient.Offset = Vector2.new(i, 0)
-					task.wait(0.03)
-				end
-				for i = 1, 0, -0.01 do
-					if not fpsCounter or not fpsCounter.Parent then break end
-					fpsGradient.Offset = Vector2.new(i, 0)
-					task.wait(0.03)
-				end
-			end
-		end)
+	if isGradientTheme then
+		applyGradient(titleLabel, themeColor, themeColorSecondary)
+		applyGradient(fpsCounter, themeColor, themeColorSecondary)
 	end
 	
 	local startTime = tick()
@@ -610,8 +622,9 @@ function CatLib:CreateWindow(config)
 	window.componentsFrame = componentsFrame
 	window.tabsFrame = tabsFrame
 	window.themeColor = themeColor
+	window.themeColorSecondary = themeColorSecondary
+	window.isGradientTheme = isGradientTheme
 	window.colorfulLetters = colorfulLetters
-	window.isSpecialCat = isSpecialCat
 	
 	tabsList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 		tabsFrame.CanvasSize = UDim2.new(0, 0, 0, tabsList.AbsoluteContentSize.Y + 10)
@@ -621,6 +634,17 @@ function CatLib:CreateWindow(config)
 	
 	function window:Notify(config)
 		task.spawn(function()
+			for _, existingNotif in pairs(notificationContainer:GetChildren()) do
+				if existingNotif:IsA("Frame") and existingNotif.Name == "Notification" then
+					local currentPos = existingNotif.Position
+					createTween(existingNotif, {
+						Position = UDim2.new(currentPos.X.Scale, currentPos.X.Offset, currentPos.Y.Scale, currentPos.Y.Offset - 90)
+					}, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out):Play()
+				end
+			end
+			
+			task.wait(0.05)
+			
 			local notifyFrame = Instance.new("Frame")
 			notifyFrame.Name = "Notification"
 			notifyFrame.Size = UDim2.new(0, 300, 0, 80)
@@ -692,6 +716,10 @@ function CatLib:CreateWindow(config)
 			loadingBarFill.BackgroundColor3 = themeColor
 			loadingBarFill.BorderSizePixel = 0
 			loadingBarFill.Parent = loadingBar
+			
+			if isGradientTheme then
+				applyGradient(loadingBarFill, themeColor, themeColorSecondary)
+			end
 			
 			local loadingBarCorner = Instance.new("UICorner")
 			loadingBarCorner.CornerRadius = UDim.new(0, 10)
@@ -769,6 +797,10 @@ function CatLib:CreateWindow(config)
 		selectionBar.BorderSizePixel = 0
 		selectionBar.ZIndex = 4
 		selectionBar.Parent = tabButton
+		
+		if isGradientTheme then
+			applyGradient(selectionBar, themeColor, themeColorSecondary)
+		end
 		
 		local selectionCorner = Instance.new("UICorner")
 		selectionCorner.CornerRadius = UDim.new(1, 0)
@@ -896,6 +928,10 @@ function CatLib:CreateWindow(config)
 			leftLine.ZIndex = 5
 			leftLine.Parent = sectionFrame
 			
+			if isGradientTheme then
+				applyGradient(leftLine, themeColor, themeColorSecondary)
+			end
+			
 			local sectionText = Instance.new("TextLabel")
 			sectionText.Size = UDim2.new(0, 90, 0, 20)
 			sectionText.Position = UDim2.new(0.5, -45, 0.5, -10)
@@ -914,6 +950,10 @@ function CatLib:CreateWindow(config)
 			rightLine.BorderSizePixel = 0
 			rightLine.ZIndex = 5
 			rightLine.Parent = sectionFrame
+			
+			if isGradientTheme then
+				applyGradient(rightLine, themeColor, themeColorSecondary)
+			end
 		end
 		
 		function tab:AddToggle(config)
@@ -985,6 +1025,9 @@ function CatLib:CreateWindow(config)
 			
 			if toggled then
 				toggleBox.BackgroundColor3 = themeColor
+				if isGradientTheme then
+					applyGradient(toggleBox, themeColor, themeColorSecondary)
+				end
 				toggleCircle.Position = UDim2.new(1, -21, 0.5, -9)
 			end
 			
@@ -993,8 +1036,14 @@ function CatLib:CreateWindow(config)
 				
 				if toggled then
 					createTween(toggleBox, {BackgroundColor3 = themeColor}, 0.25, Enum.EasingStyle.Quart):Play()
+					if isGradientTheme then
+						applyGradient(toggleBox, themeColor, themeColorSecondary)
+					end
 					createTween(toggleCircle, {Position = UDim2.new(1, -21, 0.5, -9)}, 0.25, Enum.EasingStyle.Quart):Play()
 				else
+					if toggleBox:FindFirstChild("UIGradient") then
+						toggleBox:FindFirstChild("UIGradient"):Destroy()
+					end
 					createTween(toggleBox, {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}, 0.25, Enum.EasingStyle.Quart):Play()
 					createTween(toggleCircle, {Position = UDim2.new(0, 3, 0.5, -9)}, 0.25, Enum.EasingStyle.Quart):Play()
 				end
@@ -1132,6 +1181,9 @@ function CatLib:CreateWindow(config)
 			
 			if toggled then
 				toggleBox.BackgroundColor3 = themeColor
+				if isGradientTheme then
+					applyGradient(toggleBox, themeColor, themeColorSecondary)
+				end
 				toggleCircle.Position = UDim2.new(1, -21, 0.5, -9)
 			end
 			
@@ -1140,6 +1192,9 @@ function CatLib:CreateWindow(config)
 					confirmDialog.Visible = true
 				else
 					toggled = false
+					if toggleBox:FindFirstChild("UIGradient") then
+						toggleBox:FindFirstChild("UIGradient"):Destroy()
+					end
 					createTween(toggleBox, {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}, 0.25, Enum.EasingStyle.Quart):Play()
 					createTween(toggleCircle, {Position = UDim2.new(0, 3, 0.5, -9)}, 0.25, Enum.EasingStyle.Quart):Play()
 					if config.Callback then
@@ -1152,6 +1207,9 @@ function CatLib:CreateWindow(config)
 				toggled = true
 				confirmDialog.Visible = false
 				createTween(toggleBox, {BackgroundColor3 = themeColor}, 0.25, Enum.EasingStyle.Quart):Play()
+				if isGradientTheme then
+					applyGradient(toggleBox, themeColor, themeColorSecondary)
+				end
 				createTween(toggleCircle, {Position = UDim2.new(1, -21, 0.5, -9)}, 0.25, Enum.EasingStyle.Quart):Play()
 				if config.Callback then
 					config.Callback(toggled)
@@ -1506,6 +1564,10 @@ function CatLib:CreateWindow(config)
 			sliderFill.ZIndex = 6
 			sliderFill.Parent = sliderBar
 			
+			if isGradientTheme then
+				applyGradient(sliderFill, themeColor, themeColorSecondary)
+			end
+			
 			local sliderFillCorner = Instance.new("UICorner")
 			sliderFillCorner.CornerRadius = UDim.new(1, 0)
 			sliderFillCorner.Parent = sliderFill
@@ -1625,9 +1687,15 @@ function CatLib:CreateWindow(config)
 			
 			inputBox.Focused:Connect(function()
 				createTween(underline, {BackgroundColor3 = themeColor}, 0.2, Enum.EasingStyle.Quart):Play()
+				if isGradientTheme then
+					applyGradient(underline, themeColor, themeColorSecondary)
+				end
 			end)
 			
 			inputBox.FocusLost:Connect(function(enterPressed)
+				if underline:FindFirstChild("UIGradient") then
+					underline:FindFirstChild("UIGradient"):Destroy()
+				end
 				createTween(underline, {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}, 0.2, Enum.EasingStyle.Quart):Play()
 				
 				if config.Callback then
