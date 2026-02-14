@@ -94,7 +94,7 @@ function CatLib:CreateWindow(config)
 		},
 		Red = {
 			primary = Color3.fromRGB(196, 40, 28),
-			secondary = Color3.fromRGB(220, 20, 60)
+			secondary = Color3.fromRGB(151, 0, 0)
 		},
 		Yellow = {
 			primary = Color3.fromRGB(245, 205, 48),
