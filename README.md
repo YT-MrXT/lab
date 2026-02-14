@@ -117,3 +117,219 @@ tab:AddButtonConfirmation({
 	Callback = function()
 	end
 })
+```
+
+<img src="visual/buttoncom.png" alt="buttoncom">
+
+#
+
+- Create TextBox
+
+```lua
+tab:AddTextBox({
+	Name = "TextBox Example",
+	Placeholder = "Enter your name...",
+	Default = "",
+	Callback = function(text)
+	end
+})
+```
+
+<img src="visual/textbox.png" alt="textbox">
+
+#
+
+- Create Slider
+
+```lua
+tab:AddSlider({
+	Name = "Slider Example",
+	Min = 0,
+	Max = 100,
+	Default = 50,
+	Callback = function(value)
+	end
+})
+```
+
+<img src="visual/slider.png" alt="slider">
+
+#
+
+- Create Dropdown
+
+```lua
+tab:AddDropdown({
+	Name = "Dropdown Example",
+	Options = {"Option 1", "Option 2", "Option 3"},
+	Default = "Option 1",
+	Callback = function(option)
+	end
+})
+```
+
+<img src="visual/drop.png" alt="drop">
+
+#
+
+- Create MultiDropdown
+
+```lua
+tab:AddMultiDropdown({
+	Name = "Multi Dropdown",
+	Options = {"Item 1", "Item 2", "Item 3"},
+	Default = {},
+	Callback = function(options)
+	end
+})
+```
+
+<img src="visual/multidrop.png" alt="multidrop">
+
+#
+
+- Create Paragraph
+
+```lua
+tab:AddParagraph({
+	Title = "Paragraph Title",
+	Text = "This is paragraph text"
+})
+```
+
+<img src="visual/paragraph.png" alt="paragraph">
+
+#
+
+- Create DiscordInvite
+
+```lua
+tab:AddDiscordInvite({
+	Icon = "rbxassetid://",
+	ServerName = "My Discord Server",
+	Link = "discord.gg/example",
+})
+```
+
+<img src="visual/invite.png" alt="invite">
+
+# Example of use
+
+```lua
+local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/realcath/lab/refs/heads/main/libary/catliby"))()
+
+local window = CatLib:CreateWindow({
+	Title = "My Hub",
+	Subtitle = "By zerozxk",
+	Icon = "rbxassetid://",
+	Size = UDim2.new(0, 500, 0, 300),
+	Theme = "", -- Blue, Red, Yellow, Green, Purple, Orange, Brown, Grey, SpecialCat
+	ColorfulLetters = true, -- Use "true" to enable text color changes according to the theme.
+	FloatingButton = {
+		Enabled = true,
+		Icon = "rbxassetid://",
+		Size = UDim2.new(0, 60, 0, 60),
+		Position = UDim2.new(0, 20, 0, 100),
+		Shape = "square"
+	}
+})
+
+local tab = window:CreateTab({
+	Name = "Main",
+	Title = "Main",
+	Subtitle = "Main features",
+	Icon = "rbxassetid://"
+})
+
+tab:AddSection("Settings")
+
+window:Notify({
+	Title = "Welcome!",
+	Text = "CatLib loaded successfully",
+	Duration = 5
+})
+
+tab:AddToggle({
+	Name = "Toggle Example",
+	Description = "This is a toggle with description",
+	Default = false,
+	Callback = function(value)
+		print("Toggle:", value)
+	end
+})
+
+tab:AddToggleConfirmation({
+	Name = "Toggle Confirmation",
+	Description = "Requires confirmation to enable",
+	Default = false,
+	Callback = function(value)
+		print("Toggle Confirmation:", value)
+	end
+})
+
+tab:AddButton({
+	Name = "Send Notification",
+	Callback = function()
+		window:Notify({
+			Title = "Test Notification",
+			Text = "This is a test notification!",
+			Duration = 5
+		})
+	end
+})
+
+tab:AddButtonConfirmation({
+	Name = "Button Confirmation",
+	Callback = function()
+		print("Confirmed button clicked!")
+	end
+})
+
+tab:AddTextBox({
+	Name = "TextBox Example",
+	Placeholder = "Enter your name...",
+	Default = "",
+	Callback = function(text)
+		print("TextBox:", text)
+	end
+})
+
+tab:AddSlider({
+	Name = "Slider Example",
+	Min = 0,
+	Max = 100,
+	Default = 50,
+	Callback = function(value)
+		print("Slider:", value)
+	end
+})
+
+tab:AddDropdown({
+	Name = "Dropdown Example",
+	Options = {"Option 1", "Option 2", "Option 3"},
+	Default = "Option 1",
+	Callback = function(option)
+		print("Dropdown:", option)
+	end
+})
+
+tab:AddMultiDropdown({
+	Name = "Multi Dropdown",
+	Options = {"Item 1", "Item 2", "Item 3"},
+	Default = {},
+	Callback = function(options)
+		print("Multi Dropdown:", table.concat(options, ", "))
+	end
+})
+
+tab:AddParagraph({
+	Title = "Paragraph Title",
+	Text = "This is a paragraph with some example text to demonstrate the component."
+})
+
+tab:AddDiscordInvite({
+	Icon = "rbxassetid://",
+	ServerName = "My Discord Server",
+	Link = "discord.gg/example"
+})
+```
