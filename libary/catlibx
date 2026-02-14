@@ -1,3 +1,7 @@
+ed = false
+		end
+	end)
+	
 local HttpService = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -196,24 +200,24 @@ function CatLib:CreateWindow(config)
 	runningTime.Parent = header
 	
 	if isSpecialCat then
-		local gradient = Instance.new("UIGradient")
-		gradient.Color = ColorSequence.new{
+		local titleGradient = Instance.new("UIGradient")
+		titleGradient.Color = ColorSequence.new{
 			ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 223, 0)),
 			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 165, 0)),
 			ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 223, 0))
 		}
-		gradient.Parent = titleLabel
+		titleGradient.Parent = titleLabel
 		
 		task.spawn(function()
-			while titleLabel.Parent do
+			while titleLabel and titleLabel.Parent do
 				for i = 0, 1, 0.01 do
-					if not titleLabel.Parent then break end
-					gradient.Offset = Vector2.new(i, 0)
+					if not titleLabel or not titleLabel.Parent then break end
+					titleGradient.Offset = Vector2.new(i, 0)
 					task.wait(0.03)
 				end
 				for i = 1, 0, -0.01 do
-					if not titleLabel.Parent then break end
-					gradient.Offset = Vector2.new(i, 0)
+					if not titleLabel or not titleLabel.Parent then break end
+					titleGradient.Offset = Vector2.new(i, 0)
 					task.wait(0.03)
 				end
 			end
@@ -228,14 +232,14 @@ function CatLib:CreateWindow(config)
 		fpsGradient.Parent = fpsCounter
 		
 		task.spawn(function()
-			while fpsCounter.Parent do
+			while fpsCounter and fpsCounter.Parent do
 				for i = 0, 1, 0.01 do
-					if not fpsCounter.Parent then break end
+					if not fpsCounter or not fpsCounter.Parent then break end
 					fpsGradient.Offset = Vector2.new(i, 0)
 					task.wait(0.03)
 				end
 				for i = 1, 0, -0.01 do
-					if not fpsCounter.Parent then break end
+					if not fpsCounter or not fpsCounter.Parent then break end
 					fpsGradient.Offset = Vector2.new(i, 0)
 					task.wait(0.03)
 				end
@@ -247,11 +251,13 @@ function CatLib:CreateWindow(config)
 	task.spawn(function()
 		local lastTime = tick()
 		local frameCount = 0
-		while mainFrame.Parent do
+		while mainFrame and mainFrame.Parent do
 			frameCount = frameCount + 1
 			local currentTime = tick()
 			if currentTime - lastTime >= 1 then
-				fpsCounter.Text = "FPS: " .. frameCount
+				if fpsCounter and fpsCounter.Parent then
+					fpsCounter.Text = "FPS: " .. frameCount
+				end
 				frameCount = 0
 				lastTime = currentTime
 			end
@@ -261,12 +267,14 @@ function CatLib:CreateWindow(config)
 			local minutes = math.floor((elapsed % 3600) / 60)
 			local seconds = elapsed % 60
 			
-			if hours > 0 then
-				runningTime.Text = string.format("Running Time: %dh %dm %ds", hours, minutes, seconds)
-			elseif minutes > 0 then
-				runningTime.Text = string.format("Running Time: %dm %ds", minutes, seconds)
-			else
-				runningTime.Text = string.format("Running Time: %ds", seconds)
+			if runningTime and runningTime.Parent then
+				if hours > 0 then
+					runningTime.Text = string.format("Running Time: %dh %dm %ds", hours, minutes, seconds)
+				elseif minutes > 0 then
+					runningTime.Text = string.format("Running Time: %dm %ds", minutes, seconds)
+				else
+					runningTime.Text = string.format("Running Time: %ds", seconds)
+				end
 			end
 			
 			task.wait()
@@ -485,18 +493,18 @@ function CatLib:CreateWindow(config)
 	end
 	
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
-		if not gameProcessed then
-			if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.LeftControl then
-				if mainFrame.Visible then
-					mainFrame.Visible = false
-					window:Notify({
-						Title = "Interface Hidden",
-						Text = 'Press "Alt" or "Control" to reopen the interface.',
-						Duration = 3
-					})
-				else
-					mainFrame.Visible = true
-				end
+		if gameProcessed then return end
+		
+		if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.LeftControl then
+			if mainFrame.Visible then
+				mainFrame.Visible = false
+				window:Notify({
+					Title = "Interface Hidden",
+					Text = 'Press "Alt" or "Control" to reopen the interface.',
+					Duration = 3
+				})
+			else
+				mainFrame.Visible = true
 			end
 		end
 	end)
@@ -721,10 +729,14 @@ function CatLib:CreateWindow(config)
 					local remaining = endTime - tick()
 					local seconds = math.floor(remaining)
 					local milliseconds = math.floor((remaining - seconds) * 10)
-					durationText.Text = string.format("%d.%ds", seconds, milliseconds)
+					if durationText and durationText.Parent then
+						durationText.Text = string.format("%d.%ds", seconds, milliseconds)
+					end
 					task.wait(0.1)
 				end
-				durationText.Text = "0.0s"
+				if durationText and durationText.Parent then
+					durationText.Text = "0.0s"
+				end
 			end)
 			
 			task.wait(duration)
@@ -2030,4 +2042,4 @@ function CatLib:CreateWindow(config)
 	return window
 end
 
-return CatLib
+return CatLib	minimizeButton.MouseButto
