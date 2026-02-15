@@ -93,16 +93,16 @@ function CatLib:CreateWindow(config)
 			secondary = Color3.fromRGB(30, 144, 255)
 		},
 		Red = {
-			primary = Color3.fromRGB(196, 40, 28),
-			secondary = Color3.fromRGB(151, 0, 0)
+			primary = Color3.fromRGB(96, 40, 28),
+			secondary = Color3.fromRGB(220, 20, 60)
 		},
 		Yellow = {
 			primary = Color3.fromRGB(245, 205, 48),
 			secondary = Color3.fromRGB(255, 215, 0)
 		},
 		Green = {
-			primary = Color3.fromRGB(40, 127, 71),
-			secondary = Color3.fromRGB(75, 151, 75)
+			primary = Color3.fromRGB(107, 50, 124),
+			secondary = Color3.fromRGB(144, 238, 144)
 		},
 		Purple = {
 			primary = Color3.fromRGB(142, 66, 133),
@@ -463,6 +463,113 @@ function CatLib:CreateWindow(config)
 	resizeHandle.ZIndex = 10
 	resizeHandle.Parent = mainFrame
 	
+	local confirmDialog = Instance.new("Frame")
+	confirmDialog.Name = "ConfirmDialog"
+	confirmDialog.Size = UDim2.new(0, 300, 0, 150)
+	confirmDialog.Position = UDim2.new(0.5, -150, 0.5, -75)
+	confirmDialog.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+	confirmDialog.BorderSizePixel = 0
+	confirmDialog.Visible = false
+	confirmDialog.ZIndex = 10
+	confirmDialog.Parent = mainFrame
+	
+	local confirmCorner = Instance.new("UICorner")
+	confirmCorner.CornerRadius = UDim.new(0, 12)
+	confirmCorner.Parent = confirmDialog
+	
+	local confirmText = Instance.new("TextLabel")
+	confirmText.Size = UDim2.new(1, -40, 0, 60)
+	confirmText.Position = UDim2.new(0, 20, 0, 30)
+	confirmText.BackgroundTransparency = 1
+	confirmText.Text = "Do you really want to close the UI?"
+	confirmText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	confirmText.TextSize = 16
+	confirmText.Font = Enum.Font.GothamBold
+	confirmText.TextWrapped = true
+	confirmText.ZIndex = 11
+	confirmText.Parent = confirmDialog
+	
+	local yesButton = Instance.new("TextButton")
+	yesButton.Name = "YesButton"
+	yesButton.Size = UDim2.new(0, 120, 0, 35)
+	yesButton.Position = UDim2.new(0, 20, 1, -50)
+	yesButton.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+	yesButton.BorderSizePixel = 0
+	yesButton.Text = "Yes I want"
+	yesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	yesButton.TextSize = 14
+	yesButton.Font = Enum.Font.GothamBold
+	yesButton.ZIndex = 11
+	yesButton.Parent = confirmDialog
+	
+	local yesCorner = Instance.new("UICorner")
+	yesCorner.CornerRadius = UDim.new(0, 8)
+	yesCorner.Parent = yesButton
+	
+	local noButton = Instance.new("TextButton")
+	noButton.Name = "NoButton"
+	noButton.Size = UDim2.new(0, 120, 0, 35)
+	noButton.Position = UDim2.new(1, -140, 1, -50)
+	noButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	noButton.BorderSizePixel = 0
+	noButton.Text = "I don't want"
+	noButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	noButton.TextSize = 14
+	noButton.Font = Enum.Font.GothamBold
+	noButton.ZIndex = 11
+	noButton.Parent = confirmDialog
+	
+	local noCorner = Instance.new("UICorner")
+	noCorner.CornerRadius = UDim.new(0, 8)
+	noCorner.Parent = noButton
+	
+	local minimizedBar = Instance.new("Frame")
+	minimizedBar.Name = "MinimizedBar"
+	minimizedBar.Size = UDim2.new(0, 200, 0, 40)
+	minimizedBar.Position = UDim2.new(0.5, -100, 0, -50)
+	minimizedBar.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+	minimizedBar.BorderSizePixel = 0
+	minimizedBar.Visible = false
+	minimizedBar.Parent = screenGui
+	
+	local minBarCorner = Instance.new("UICorner")
+	minBarCorner.CornerRadius = UDim.new(0, 10)
+	minBarCorner.Parent = minimizedBar
+	
+	local minBarIcon = Instance.new("ImageLabel")
+	minBarIcon.Size = UDim2.new(0, 24, 0, 24)
+	minBarIcon.Position = UDim2.new(0, 8, 0, 8)
+	minBarIcon.BackgroundTransparency = 1
+	minBarIcon.Image = config.Icon or ""
+	minBarIcon.ZIndex = 2
+	minBarIcon.Parent = minimizedBar
+	
+	local minBarTitle = Instance.new("TextLabel")
+	minBarTitle.Size = UDim2.new(0, 100, 0, 24)
+	minBarTitle.Position = UDim2.new(0, 36, 0, 8)
+	minBarTitle.BackgroundTransparency = 1
+	minBarTitle.Text = config.Title or "Window"
+	minBarTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	minBarTitle.TextSize = 14
+	minBarTitle.Font = Enum.Font.GothamBold
+	minBarTitle.TextXAlignment = Enum.TextXAlignment.Left
+	minBarTitle.ZIndex = 2
+	minBarTitle.Parent = minimizedBar
+	
+	local restoreButton = Instance.new("ImageButton")
+	restoreButton.Size = UDim2.new(0, 24, 0, 24)
+	restoreButton.Position = UDim2.new(1, -32, 0, 8)
+	restoreButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+	restoreButton.BorderSizePixel = 0
+	restoreButton.Image = "rbxassetid://128150517379134"
+	restoreButton.ImageColor3 = themeColor
+	restoreButton.ZIndex = 2
+	restoreButton.Parent = minimizedBar
+	
+	local restoreCorner = Instance.new("UICorner")
+	restoreCorner.CornerRadius = UDim.new(0, 6)
+	restoreCorner.Parent = restoreButton
+	
 	if config.FloatingButton and config.FloatingButton.Enabled then
 		local floatingButton = Instance.new("ImageButton")
 		floatingButton.Name = "FloatingButton"
@@ -494,6 +601,7 @@ function CatLib:CreateWindow(config)
 		floatingButton.MouseButton1Click:Connect(function()
 			if mainFrame.Visible then
 				mainFrame.Visible = false
+				minimizedBar.Visible = false
 			else
 				mainFrame.Visible = true
 			end
@@ -506,6 +614,7 @@ function CatLib:CreateWindow(config)
 		if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.LeftControl then
 			if mainFrame.Visible then
 				mainFrame.Visible = false
+				minimizedBar.Visible = false
 				window:Notify({
 					Title = "Interface Hidden",
 					Text = 'Press "Alt" or "Control" to reopen the interface.',
@@ -567,6 +676,14 @@ function CatLib:CreateWindow(config)
 		createTween(closeButton, {Size = UDim2.new(0, 28, 0, 28)}, 0.1):Play()
 		wait(0.1)
 		createTween(closeButton, {Size = UDim2.new(0, 32, 0, 32)}, 0.1):Play()
+		confirmDialog.Visible = true
+	end)
+	
+	yesButton.MouseButton1Click:Connect(function()
+		createTween(yesButton, {Size = UDim2.new(0, 115, 0, 32)}, 0.1):Play()
+		wait(0.1)
+		createTween(yesButton, {Size = UDim2.new(0, 120, 0, 35)}, 0.1):Play()
+		wait(0.1)
 		
 		local closeTween = createTween(mainFrame, {
 			Size = UDim2.new(0, 0, 0, 0),
@@ -575,6 +692,14 @@ function CatLib:CreateWindow(config)
 		closeTween:Play()
 		closeTween.Completed:Wait()
 		screenGui:Destroy()
+	end)
+	
+	noButton.MouseButton1Click:Connect(function()
+		createTween(noButton, {Size = UDim2.new(0, 115, 0, 32)}, 0.1):Play()
+		wait(0.1)
+		createTween(noButton, {Size = UDim2.new(0, 120, 0, 35)}, 0.1):Play()
+		wait(0.1)
+		confirmDialog.Visible = false
 	end)
 	
 	maximizeButton.MouseButton1Click:Connect(function()
@@ -605,16 +730,38 @@ function CatLib:CreateWindow(config)
 		createTween(minimizeButton, {Size = UDim2.new(0, 32, 0, 32)}, 0.1):Play()
 		wait(0.1)
 		
-		originalSize = mainFrame.Size
-		originalPosition = mainFrame.Position
-		
 		local minTween = createTween(mainFrame, {
 			Size = UDim2.new(0, 0, 0, 0),
 			Position = UDim2.new(0.5, 0, 0, 20)
 		}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
 		minTween:Play()
+		
+		local barTween = createTween(minimizedBar, {Position = UDim2.new(0.5, -100, 0, 10)}, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+		
 		minTween.Completed:Wait()
 		mainFrame.Visible = false
+		minimizedBar.Visible = true
+		barTween:Play()
+	end)
+	
+	restoreButton.MouseButton1Click:Connect(function()
+		createTween(restoreButton, {Size = UDim2.new(0, 20, 0, 20)}, 0.1):Play()
+		wait(0.1)
+		createTween(restoreButton, {Size = UDim2.new(0, 24, 0, 24)}, 0.1):Play()
+		
+		local barTween = createTween(minimizedBar, {Position = UDim2.new(0.5, -100, 0, -50)}, 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+		barTween:Play()
+		barTween.Completed:Wait()
+		minimizedBar.Visible = false
+		
+		mainFrame.Position = UDim2.new(0.5, 0, 0, 20)
+		mainFrame.Size = UDim2.new(0, 0, 0, 0)
+		mainFrame.Visible = true
+		
+		createTween(mainFrame, {
+			Size = originalSize,
+			Position = originalPosition
+		}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out):Play()
 	end)
 	
 	window.screenGui = screenGui
