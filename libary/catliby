@@ -120,6 +120,10 @@ function CatLib:CreateWindow(config)
 			primary = Color3.fromRGB(185, 220, 235),
 			secondary = Color3.fromRGB(20, 20, 20)
 		},
+		Midnight = {
+			primary = Color3.fromRGB(191, 6, 15),
+			secondary = Color3.fromRGB(10, 10, 10)
+		},
 		Grey = {
 			primary = Color3.fromRGB(137, 135, 136),
 			secondary = Color3.fromRGB(192, 192, 192)
