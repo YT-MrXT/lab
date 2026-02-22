@@ -1,0 +1,889 @@
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+
+local CatLib = {}
+
+local function tween(instance, properties, duration)
+    local tweenInfo = TweenInfo.new(duration or 0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(instance, tweenInfo, properties)
+    tween:Play()
+    return tween
+end
+
+local function applyGradient(element, color1, color2)
+    local gradient = element:FindFirstChild("UIGradient")
+    if not gradient then
+        gradient = Instance.new("UIGradient")
+        gradient.Parent = element
+    end
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, color1),
+        ColorSequenceKeypoint.new(0.5, color2),
+        ColorSequenceKeypoint.new(1, color1)
+    }
+    
+    task.spawn(function()
+        while element and element.Parent do
+            for i = 0, 1, 0.01 do
+                if not element or not element.Parent then break end
+                gradient.Offset = Vector2.new(i, 0)
+                task.wait(0.03)
+            end
+            for i = 1, 0, -0.01 do
+                if not element or not element.Parent then break end
+                gradient.Offset = Vector2.new(i, 0)
+                task.wait(0.03)
+            end
+        end
+    end)
+end
+
+local function makeDraggable(frame, handle)
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
+    end)
+
+    handle.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+function CatLib:CreateWindow(config)
+    local window = {}
+    
+    local colorThemes = {
+        Blue = {primary = Color3.fromRGB(13, 105, 172), secondary = Color3.fromRGB(30, 144, 255)},
+        Red = {primary = Color3.fromRGB(96, 40, 28), secondary = Color3.fromRGB(220, 20, 60)},
+        Yellow = {primary = Color3.fromRGB(245, 205, 48), secondary = Color3.fromRGB(255, 215, 0)},
+        Green = {primary = Color3.fromRGB(107, 50, 124), secondary = Color3.fromRGB(144, 238, 144)},
+        Purple = {primary = Color3.fromRGB(142, 66, 133), secondary = Color3.fromRGB(186, 85, 211)},
+        Orange = {primary = Color3.fromRGB(218, 133, 65), secondary = Color3.fromRGB(255, 165, 0)},
+        Brown = {primary = Color3.fromRGB(105, 64, 40), secondary = Color3.fromRGB(139, 90, 43)},
+        Grey = {primary = Color3.fromRGB(137, 135, 136), secondary = Color3.fromRGB(192, 192, 192)},
+        SpecialCat = {primary = Color3.fromRGB(255, 223, 0), secondary = Color3.fromRGB(255, 165, 0)}
+    }
+    
+    local themeColor = Color3.fromRGB(255, 255, 255)
+    local themeColorSecondary = Color3.fromRGB(255, 255, 255)
+    local isGradientTheme = false
+    
+    if config.Theme then
+        if colorThemes[config.Theme] then
+            themeColor = colorThemes[config.Theme].primary
+            themeColorSecondary = colorThemes[config.Theme].secondary
+            isGradientTheme = true
+        end
+    end
+    
+    local colorfulLetters = config.ColorfulLetters or false
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "CatLib"
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = CoreGui
+    
+    local notificationContainer = Instance.new("Frame")
+    notificationContainer.Name = "NotificationContainer"
+    notificationContainer.Size = UDim2.new(0, 320, 1, 0)
+    notificationContainer.Position = UDim2.new(1, -340, 0, 0)
+    notificationContainer.BackgroundTransparency = 1
+    notificationContainer.ZIndex = 1000
+    notificationContainer.Parent = screenGui
+    
+    local notificationLayout = Instance.new("UIListLayout")
+    notificationLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    notificationLayout.Padding = UDim.new(0, 10)
+    notificationLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    notificationLayout.Parent = notificationContainer
+    
+    local notificationPadding = Instance.new("UIPadding")
+    notificationPadding.PaddingBottom = UDim.new(0, 20)
+    notificationPadding.Parent = notificationContainer
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainWindow"
+    mainFrame.Size = config.Size or UDim2.new(0, 600, 0, 400)
+    mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.ClipsDescendants = true
+    mainFrame.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = mainFrame
+    
+    local header = Instance.new("Frame")
+    header.Name = "Header"
+    header.Size = UDim2.new(1, 0, 0, 50)
+    header.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+    header.BorderSizePixel = 0
+    header.ZIndex = 1
+    header.Parent = mainFrame
+    
+    local headerCorner = Instance.new("UICorner")
+    headerCorner.CornerRadius = UDim.new(0, 12)
+    headerCorner.Parent = header
+    
+    local iconFrame = Instance.new("ImageLabel")
+    iconFrame.Name = "Icon"
+    iconFrame.Size = UDim2.new(0, 32, 0, 32)
+    iconFrame.Position = UDim2.new(0, 12, 0, 9)
+    iconFrame.BackgroundTransparency = 1
+    iconFrame.Image = config.Icon or ""
+    iconFrame.ZIndex = 2
+    iconFrame.Parent = header
+    
+    if isGradientTheme then
+        applyGradient(iconFrame, themeColor, themeColorSecondary)
+    end
+    
+    local fullTitle = config.Title or "Window"
+    local titleText = fullTitle
+    local subtitleText = ""
+    
+    if fullTitle:find(" %- ") then
+        local parts = fullTitle:split(" - ")
+        titleText = parts[1]
+        subtitleText = parts[2] or ""
+    end
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "Title"
+    titleLabel.Size = UDim2.new(0, 200, 0, 20)
+    titleLabel.Position = UDim2.new(0, 50, 0, 8)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = titleText
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = 16
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = 2
+    titleLabel.Parent = header
+    
+    local subtitleLabel = Instance.new("TextLabel")
+    subtitleLabel.Name = "Subtitle"
+    subtitleLabel.Size = UDim2.new(0, 200, 0, 16)
+    subtitleLabel.Position = UDim2.new(0, 50, 0, 28)
+    subtitleLabel.BackgroundTransparency = 1
+    subtitleLabel.Text = subtitleText
+    subtitleLabel.TextColor3 = colorfulLetters and themeColor or Color3.fromRGB(255, 255, 255)
+    subtitleLabel.TextTransparency = 0.5
+    subtitleLabel.TextSize = 12
+    subtitleLabel.Font = Enum.Font.Gotham
+    subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    subtitleLabel.ZIndex = 2
+    subtitleLabel.Parent = header
+    
+    if isGradientTheme and colorfulLetters then
+        applyGradient(subtitleLabel, themeColor, themeColorSecondary)
+    end
+    
+    local fpsCounter = Instance.new("TextLabel")
+    fpsCounter.Name = "FPSCounter"
+    fpsCounter.Size = UDim2.new(0, 100, 0, 18)
+    fpsCounter.Position = UDim2.new(0.5, -50, 0, 8)
+    fpsCounter.BackgroundTransparency = 1
+    fpsCounter.Text = "FPS: 60"
+    fpsCounter.TextColor3 = colorfulLetters and themeColor or Color3.fromRGB(255, 255, 255)
+    fpsCounter.TextSize = 13
+    fpsCounter.Font = Enum.Font.GothamBold
+    fpsCounter.ZIndex = 2
+    fpsCounter.Parent = header
+    
+    local runningTime = Instance.new("TextLabel")
+    runningTime.Name = "RunningTime"
+    runningTime.Size = UDim2.new(0, 150, 0, 16)
+    runningTime.Position = UDim2.new(0.5, -75, 0, 28)
+    runningTime.BackgroundTransparency = 1
+    runningTime.Text = "Running Time: 0s"
+    runningTime.TextColor3 = Color3.fromRGB(255, 255, 255)
+    runningTime.TextTransparency = 0.5
+    runningTime.TextSize = 11
+    runningTime.Font = Enum.Font.Gotham
+    runningTime.ZIndex = 2
+    runningTime.Parent = header
+    
+    if isGradientTheme then
+        applyGradient(fpsCounter, themeColor, themeColorSecondary)
+    end
+    
+    local startTime = tick()
+    task.spawn(function()
+        local lastTime = tick()
+        local frameCount = 0
+        while mainFrame and mainFrame.Parent do
+            frameCount = frameCount + 1
+            local currentTime = tick()
+            if currentTime - lastTime >= 1 then
+                if fpsCounter and fpsCounter.Parent then
+                    fpsCounter.Text = "FPS: " .. frameCount
+                end
+                frameCount = 0
+                lastTime = currentTime
+            end
+            
+            local elapsed = math.floor(tick() - startTime)
+            local hours = math.floor(elapsed / 3600)
+            local minutes = math.floor((elapsed % 3600) / 60)
+            local seconds = elapsed % 60
+            
+            if runningTime and runningTime.Parent then
+                if hours > 0 then
+                    runningTime.Text = string.format("Running Time: %dh %dm %ds", hours, minutes, seconds)
+                elseif minutes > 0 then
+                    runningTime.Text = string.format("Running Time: %dm %ds", minutes, seconds)
+                else
+                    runningTime.Text = string.format("Running Time: %ds", seconds)
+                end
+            end
+            
+            task.wait()
+        end
+    end)
+    
+    local closeButton = Instance.new("ImageButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 32, 0, 32)
+    closeButton.Position = UDim2.new(1, -44, 0, 9)
+    closeButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+    closeButton.BorderSizePixel = 0
+    closeButton.Image = "rbxassetid://113187532560127"
+    closeButton.ImageColor3 = themeColor
+    closeButton.ZIndex = 2
+    closeButton.Parent = header
+    
+    if isGradientTheme then
+        applyGradient(closeButton, themeColor, themeColorSecondary)
+    end
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 8)
+    closeCorner.Parent = closeButton
+    
+    local maximizeButton = Instance.new("ImageButton")
+    maximizeButton.Name = "MaximizeButton"
+    maximizeButton.Size = UDim2.new(0, 32, 0, 32)
+    maximizeButton.Position = UDim2.new(1, -84, 0, 9)
+    maximizeButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+    maximizeButton.BorderSizePixel = 0
+    maximizeButton.Image = "rbxassetid://83674583438465"
+    maximizeButton.ImageColor3 = themeColor
+    maximizeButton.ZIndex = 2
+    maximizeButton.Parent = header
+    
+    if isGradientTheme then
+        applyGradient(maximizeButton, themeColor, themeColorSecondary)
+    end
+    
+    local maxCorner = Instance.new("UICorner")
+    maxCorner.CornerRadius = UDim.new(0, 8)
+    maxCorner.Parent = maximizeButton
+    
+    local minimizeButton = Instance.new("ImageButton")
+    minimizeButton.Name = "MinimizeButton"
+    minimizeButton.Size = UDim2.new(0, 32, 0, 32)
+    minimizeButton.Position = UDim2.new(1, -124, 0, 9)
+    minimizeButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+    minimizeButton.BorderSizePixel = 0
+    minimizeButton.Image = "rbxassetid://128150517379134"
+    minimizeButton.ImageColor3 = themeColor
+    minimizeButton.ZIndex = 2
+    minimizeButton.Parent = header
+    
+    if isGradientTheme then
+        applyGradient(minimizeButton, themeColor, themeColorSecondary)
+    end
+    
+    local minCorner = Instance.new("UICorner")
+    minCorner.CornerRadius = UDim.new(0, 8)
+    minCorner.Parent = minimizeButton
+    
+    local minimizedBar = Instance.new("Frame")
+    minimizedBar.Name = "MinimizedBar"
+    minimizedBar.Size = UDim2.new(0, 200, 0, 40)
+    minimizedBar.Position = UDim2.new(0.5, -100, 0, -50)
+    minimizedBar.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+    minimizedBar.BorderSizePixel = 0
+    minimizedBar.Visible = false
+    minimizedBar.Parent = screenGui
+    
+    local minBarCorner = Instance.new("UICorner")
+    minBarCorner.CornerRadius = UDim.new(0, 10)
+    minBarCorner.Parent = minimizedBar
+    
+    local minBarIcon = Instance.new("ImageLabel")
+    minBarIcon.Size = UDim2.new(0, 24, 0, 24)
+    minBarIcon.Position = UDim2.new(0, 8, 0, 8)
+    minBarIcon.BackgroundTransparency = 1
+    minBarIcon.Image = config.Icon or ""
+    minBarIcon.ZIndex = 2
+    minBarIcon.Parent = minimizedBar
+    
+    if isGradientTheme then
+        applyGradient(minBarIcon, themeColor, themeColorSecondary)
+    end
+    
+    local minBarTitle = Instance.new("TextLabel")
+    minBarTitle.Size = UDim2.new(0, 100, 0, 24)
+    minBarTitle.Position = UDim2.new(0, 36, 0, 8)
+    minBarTitle.BackgroundTransparency = 1
+    minBarTitle.Text = titleText
+    minBarTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minBarTitle.TextSize = 14
+    minBarTitle.Font = Enum.Font.GothamBold
+    minBarTitle.TextXAlignment = Enum.TextXAlignment.Left
+    minBarTitle.ZIndex = 2
+    minBarTitle.Parent = minimizedBar
+    
+    local restoreButton = Instance.new("ImageButton")
+    restoreButton.Size = UDim2.new(0, 24, 0, 24)
+    restoreButton.Position = UDim2.new(1, -32, 0, 8)
+    restoreButton.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+    restoreButton.BorderSizePixel = 0
+    restoreButton.Image = "rbxassetid://128150517379134"
+    restoreButton.ImageColor3 = themeColor
+    restoreButton.ZIndex = 2
+    restoreButton.Parent = minimizedBar
+    
+    if isGradientTheme then
+        applyGradient(restoreButton, themeColor, themeColorSecondary)
+    end
+    
+    local restoreCorner = Instance.new("UICorner")
+    restoreCorner.CornerRadius = UDim.new(0, 6)
+    restoreCorner.Parent = restoreButton
+    
+    local confirmDialog = Instance.new("Frame")
+    confirmDialog.Name = "ConfirmDialog"
+    confirmDialog.Size = UDim2.new(0, 300, 0, 150)
+    confirmDialog.Position = UDim2.new(0.5, -150, 0.5, -75)
+    confirmDialog.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+    confirmDialog.BorderSizePixel = 0
+    confirmDialog.Visible = false
+    confirmDialog.ZIndex = 10
+    confirmDialog.Parent = mainFrame
+    
+    local confirmCorner = Instance.new("UICorner")
+    confirmCorner.CornerRadius = UDim.new(0, 12)
+    confirmCorner.Parent = confirmDialog
+    
+    local confirmText = Instance.new("TextLabel")
+    confirmText.Size = UDim2.new(1, -40, 0, 60)
+    confirmText.Position = UDim2.new(0, 20, 0, 30)
+    confirmText.BackgroundTransparency = 1
+    confirmText.Text = "Do you really want to close the UI?"
+    confirmText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    confirmText.TextSize = 16
+    confirmText.Font = Enum.Font.GothamBold
+    confirmText.TextWrapped = true
+    confirmText.ZIndex = 11
+    confirmText.Parent = confirmDialog
+    
+    local yesButton = Instance.new("TextButton")
+    yesButton.Name = "YesButton"
+    yesButton.Size = UDim2.new(0, 120, 0, 35)
+    yesButton.Position = UDim2.new(0, 20, 1, -50)
+    yesButton.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+    yesButton.BorderSizePixel = 0
+    yesButton.Text = "Yes I want"
+    yesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    yesButton.TextSize = 14
+    yesButton.Font = Enum.Font.GothamBold
+    yesButton.ZIndex = 11
+    yesButton.Parent = confirmDialog
+    
+    local yesCorner = Instance.new("UICorner")
+    yesCorner.CornerRadius = UDim.new(0, 8)
+    yesCorner.Parent = yesButton
+    
+    local noButton = Instance.new("TextButton")
+    noButton.Name = "NoButton"
+    noButton.Size = UDim2.new(0, 120, 0, 35)
+    noButton.Position = UDim2.new(1, -140, 1, -50)
+    noButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    noButton.BorderSizePixel = 0
+    noButton.Text = "I don't want"
+    noButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    noButton.TextSize = 14
+    noButton.Font = Enum.Font.GothamBold
+    noButton.ZIndex = 11
+    noButton.Parent = confirmDialog
+    
+    local noCorner = Instance.new("UICorner")
+    noCorner.CornerRadius = UDim.new(0, 8)
+    noCorner.Parent = noButton
+    
+    closeButton.MouseEnter:Connect(function()
+        tween(closeButton, {BackgroundColor3 = Color3.fromRGB(220, 50, 50)}, 0.2)
+    end)
+    
+    closeButton.MouseLeave:Connect(function()
+        tween(closeButton, {BackgroundColor3 = Color3.fromRGB(22, 22, 22)}, 0.2)
+    end)
+    
+    closeButton.MouseButton1Click:Connect(function()
+        tween(closeButton, {Size = UDim2.new(0, 28, 0, 28)}, 0.1)
+        task.wait(0.1)
+        tween(closeButton, {Size = UDim2.new(0, 32, 0, 32)}, 0.1)
+        confirmDialog.Visible = true
+    end)
+    
+    yesButton.MouseButton1Click:Connect(function()
+        tween(yesButton, {Size = UDim2.new(0, 115, 0, 32)}, 0.1)
+        task.wait(0.1)
+        tween(yesButton, {Size = UDim2.new(0, 120, 0, 35)}, 0.1)
+        task.wait(0.1)
+        
+        local closeTween = tween(mainFrame, {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        }, 0.4)
+        closeTween.Completed:Wait()
+        screenGui:Destroy()
+    end)
+    
+    noButton.MouseButton1Click:Connect(function()
+        tween(noButton, {Size = UDim2.new(0, 115, 0, 32)}, 0.1)
+        task.wait(0.1)
+        tween(noButton, {Size = UDim2.new(0, 120, 0, 35)}, 0.1)
+        task.wait(0.1)
+        confirmDialog.Visible = false
+    end)
+    
+    local isMaximized = false
+    local originalSize = mainFrame.Size
+    local originalPosition = mainFrame.Position
+    
+    maximizeButton.MouseButton1Click:Connect(function()
+        tween(maximizeButton, {Size = UDim2.new(0, 28, 0, 28)}, 0.1)
+        task.wait(0.1)
+        tween(maximizeButton, {Size = UDim2.new(0, 32, 0, 32)}, 0.1)
+        
+        if not isMaximized then
+            originalSize = mainFrame.Size
+            originalPosition = mainFrame.Position
+            tween(mainFrame, {
+                Size = UDim2.new(1, 0, 1, 0),
+                Position = UDim2.new(0, 0, 0, 0)
+            }, 0.3)
+            isMaximized = true
+        else
+            tween(mainFrame, {
+                Size = originalSize,
+                Position = originalPosition
+            }, 0.3)
+            isMaximized = false
+        end
+    end)
+    
+    minimizeButton.MouseButton1Click:Connect(function()
+        tween(minimizeButton, {Size = UDim2.new(0, 28, 0, 28)}, 0.1)
+        task.wait(0.1)
+        tween(minimizeButton, {Size = UDim2.new(0, 32, 0, 32)}, 0.1)
+        task.wait(0.1)
+        
+        local sizeTween = tween(mainFrame, {
+            Size = UDim2.new(0, 200, 0, 50)
+        }, 0.25)
+        
+        local posTween = tween(mainFrame, {
+            Position = UDim2.new(0.5, -100, 0, -25)
+        }, 0.25)
+        
+        local opacityTween = tween(mainFrame, {
+            BackgroundTransparency = 1
+        }, 0.25)
+        
+        sizeTween.Completed:Wait()
+        mainFrame.Visible = false
+        minimizedBar.Visible = true
+        
+        tween(minimizedBar, {Position = UDim2.new(0.5, -100, 0, 10)}, 0.3)
+    end)
+    
+    restoreButton.MouseButton1Click:Connect(function()
+        tween(restoreButton, {Size = UDim2.new(0, 20, 0, 20)}, 0.1)
+        task.wait(0.1)
+        tween(restoreButton, {Size = UDim2.new(0, 24, 0, 24)}, 0.1)
+        
+        tween(minimizedBar, {Position = UDim2.new(0.5, -100, 0, -50)}, 0.3)
+        task.wait(0.3)
+        minimizedBar.Visible = false
+        
+        mainFrame.Position = UDim2.new(0.5, -100, 0, -25)
+        mainFrame.Size = UDim2.new(0, 200, 0, 50)
+        mainFrame.BackgroundTransparency = 1
+        mainFrame.Visible = true
+        
+        tween(mainFrame, {BackgroundTransparency = 0}, 0.25)
+        tween(mainFrame, {
+            Size = originalSize,
+            Position = originalPosition
+        }, 0.3)
+    end)
+    
+    makeDraggable(mainFrame, header)
+    
+    function window:Notify(config)
+        task.spawn(function()
+            for _, existingNotif in pairs(notificationContainer:GetChildren()) do
+                if existingNotif:IsA("Frame") and existingNotif.Name == "Notification" then
+                    local currentPos = existingNotif.Position
+                    tween(existingNotif, {
+                        Position = UDim2.new(currentPos.X.Scale, currentPos.X.Offset, currentPos.Y.Scale, currentPos.Y.Offset - 90)
+                    }, 0.3)
+                end
+            end
+            
+            task.wait(0.05)
+            
+            local notifyFrame = Instance.new("Frame")
+            notifyFrame.Name = "Notification"
+            notifyFrame.Size = UDim2.new(0, 300, 0, 80)
+            notifyFrame.Position = UDim2.new(1, 20, 1, 0)
+            notifyFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+            notifyFrame.BorderSizePixel = 0
+            notifyFrame.LayoutOrder = tick()
+            notifyFrame.Parent = notificationContainer
+            
+            local notifyCorner = Instance.new("UICorner")
+            notifyCorner.CornerRadius = UDim.new(0, 10)
+            notifyCorner.Parent = notifyFrame
+            
+            local notifyIcon = Instance.new("ImageLabel")
+            notifyIcon.Size = UDim2.new(0, 24, 0, 24)
+            notifyIcon.Position = UDim2.new(0, 12, 0, 12)
+            notifyIcon.BackgroundTransparency = 1
+            notifyIcon.Image = "rbxassetid://85051593348488"
+            notifyIcon.ImageColor3 = themeColor
+            notifyIcon.Parent = notifyFrame
+            
+            if isGradientTheme then
+                applyGradient(notifyIcon, themeColor, themeColorSecondary)
+            end
+            
+            local notifyTitle = Instance.new("TextLabel")
+            notifyTitle.Size = UDim2.new(1, -50, 0, 20)
+            notifyTitle.Position = UDim2.new(0, 42, 0, 10)
+            notifyTitle.BackgroundTransparency = 1
+            notifyTitle.Text = config.Title or "Notification"
+            notifyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notifyTitle.TextSize = 14
+            notifyTitle.Font = Enum.Font.GothamBold
+            notifyTitle.TextXAlignment = Enum.TextXAlignment.Left
+            notifyTitle.TextTruncate = Enum.TextTruncate.AtEnd
+            notifyTitle.TextScaled = false
+            notifyTitle.Parent = notifyFrame
+            
+            local notifyText = Instance.new("TextLabel")
+            notifyText.Size = UDim2.new(1, -50, 0, 30)
+            notifyText.Position = UDim2.new(0, 42, 0, 32)
+            notifyText.BackgroundTransparency = 1
+            notifyText.Text = config.Text or ""
+            notifyText.TextColor3 = Color3.fromRGB(255, 255, 255)
+            notifyText.TextTransparency = 0.5
+            notifyText.TextSize = 12
+            notifyText.Font = Enum.Font.Gotham
+            notifyText.TextXAlignment = Enum.TextXAlignment.Left
+            notifyText.TextYAlignment = Enum.TextYAlignment.Top
+            notifyText.TextWrapped = true
+            notifyText.TextScaled = false
+            notifyText.Parent = notifyFrame
+            
+            if notifyTitle.TextFits == false then
+                notifyTitle.TextScaled = true
+            end
+            
+            if notifyText.TextFits == false then
+                notifyText.TextScaled = true
+            end
+            
+            local loadingBar = Instance.new("Frame")
+            loadingBar.Name = "LoadingBar"
+            loadingBar.Size = UDim2.new(1, 0, 0, 3)
+            loadingBar.Position = UDim2.new(0, 0, 1, -3)
+            loadingBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            loadingBar.BorderSizePixel = 0
+            loadingBar.Parent = notifyFrame
+            
+            local loadingBarFill = Instance.new("Frame")
+            loadingBarFill.Name = "Fill"
+            loadingBarFill.Size = UDim2.new(1, 0, 1, 0)
+            loadingBarFill.BackgroundColor3 = themeColor
+            loadingBarFill.BorderSizePixel = 0
+            loadingBarFill.Parent = loadingBar
+            
+            if isGradientTheme then
+                applyGradient(loadingBarFill, themeColor, themeColorSecondary)
+            end
+            
+            local loadingBarCorner = Instance.new("UICorner")
+            loadingBarCorner.CornerRadius = UDim.new(0, 10)
+            loadingBarCorner.Parent = loadingBar
+            
+            local loadingBarFillCorner = Instance.new("UICorner")
+            loadingBarFillCorner.CornerRadius = UDim.new(0, 10)
+            loadingBarFillCorner.Parent = loadingBarFill
+            
+            local duration = config.Duration or 3
+            local durationText = Instance.new("TextLabel")
+            durationText.Size = UDim2.new(0, 40, 0, 15)
+            durationText.Position = UDim2.new(0, 5, 1, -18)
+            durationText.BackgroundTransparency = 1
+            durationText.Text = tostring(duration) .. "s"
+            durationText.TextColor3 = Color3.fromRGB(255, 255, 255)
+            durationText.TextTransparency = 0.6
+            durationText.TextSize = 10
+            durationText.Font = Enum.Font.Gotham
+            durationText.Parent = notifyFrame
+            
+            tween(notifyFrame, {Position = UDim2.new(0, 0, 1, 0)}, 0.4)
+            
+            tween(loadingBarFill, {Size = UDim2.new(0, 0, 1, 0)}, duration)
+            
+            task.spawn(function()
+                local startTime = tick()
+                local endTime = startTime + duration
+                
+                while tick() < endTime do
+                    local remaining = endTime - tick()
+                    local seconds = math.floor(remaining)
+                    local milliseconds = math.floor((remaining - seconds) * 10)
+                    if durationText and durationText.Parent then
+                        durationText.Text = string.format("%d.%ds", seconds, milliseconds)
+                    end
+                    task.wait(0.1)
+                end
+                if durationText and durationText.Parent then
+                    durationText.Text = "0.0s"
+                end
+            end)
+            
+            task.wait(duration)
+            
+            local exitTween = tween(notifyFrame, {Position = UDim2.new(1, 20, 1, 0)}, 0.35)
+            exitTween.Completed:Wait()
+            notifyFrame:Destroy()
+        end)
+    end
+    
+    function window:AddDiscordInvite(config)
+        local discordFrame = Instance.new("Frame")
+        discordFrame.Name = "DiscordInvite"
+        discordFrame.Size = UDim2.new(0, 350, 0, 180)
+        discordFrame.Position = UDim2.new(0.5, -175, 0.5, -90)
+        discordFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+        discordFrame.BorderSizePixel = 0
+        discordFrame.Parent = screenGui
+        
+        local discordCorner = Instance.new("UICorner")
+        discordCorner.CornerRadius = UDim.new(0, 12)
+        discordCorner.Parent = discordFrame
+        
+        local bannerFrame = Instance.new("ImageLabel")
+        bannerFrame.Size = UDim2.new(1, 0, 0, 80)
+        bannerFrame.Position = UDim2.new(0, 0, 0, 0)
+        bannerFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        bannerFrame.Image = config.Banner or ""
+        bannerFrame.ScaleType = Enum.ScaleType.Crop
+        bannerFrame.ClipsDescendants = true
+        bannerFrame.Parent = discordFrame
+        
+        local bannerCorner = Instance.new("UICorner")
+        bannerCorner.CornerRadius = UDim.new(0, 12)
+        bannerCorner.Parent = bannerFrame
+        
+        local bannerCover = Instance.new("Frame")
+        bannerCover.Size = UDim2.new(1, 0, 0, 20)
+        bannerCover.Position = UDim2.new(0, 0, 1, -20)
+        bannerCover.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        bannerCover.BorderSizePixel = 0
+        bannerCover.Parent = bannerFrame
+        
+        local serverIcon = Instance.new("ImageLabel")
+        serverIcon.Size = UDim2.new(0, 60, 0, 60)
+        serverIcon.Position = UDim2.new(0, 20, 0, 50)
+        serverIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        serverIcon.Image = config.Icon or ""
+        serverIcon.Parent = discordFrame
+        
+        local serverIconCorner = Instance.new("UICorner")
+        serverIconCorner.CornerRadius = UDim.new(1, 0)
+        serverIconCorner.Parent = serverIcon
+        
+        local serverIconBorder = Instance.new("UIStroke")
+        serverIconBorder.Thickness = 3
+        serverIconBorder.Color = Color3.fromRGB(12, 12, 12)
+        serverIconBorder.Parent = serverIcon
+        
+        local serverTitle = Instance.new("TextLabel")
+        serverTitle.Size = UDim2.new(1, -100, 0, 22)
+        serverTitle.Position = UDim2.new(0, 90, 0, 55)
+        serverTitle.BackgroundTransparency = 1
+        serverTitle.Text = config.ServerName or "Discord Server"
+        serverTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        serverTitle.TextSize = 16
+        serverTitle.Font = Enum.Font.GothamBold
+        serverTitle.TextXAlignment = Enum.TextXAlignment.Left
+        serverTitle.Parent = discordFrame
+        
+        local serverDesc = Instance.new("TextLabel")
+        serverDesc.Size = UDim2.new(1, -100, 0, 18)
+        serverDesc.Position = UDim2.new(0, 90, 0, 80)
+        serverDesc.BackgroundTransparency = 1
+        serverDesc.Text = config.Description or "Join our community!"
+        serverDesc.TextColor3 = Color3.fromRGB(200, 200, 200)
+        serverDesc.TextSize = 13
+        serverDesc.Font = Enum.Font.Gotham
+        serverDesc.TextXAlignment = Enum.TextXAlignment.Left
+        serverDesc.Parent = discordFrame
+        
+        local onlineIndicator = Instance.new("Frame")
+        onlineIndicator.Size = UDim2.new(0, 8, 0, 8)
+        onlineIndicator.Position = UDim2.new(0, 20, 0, 120)
+        onlineIndicator.BackgroundColor3 = Color3.fromRGB(67, 181, 129)
+        onlineIndicator.BorderSizePixel = 0
+        onlineIndicator.Parent = discordFrame
+        
+        local onlineCorner = Instance.new("UICorner")
+        onlineCorner.CornerRadius = UDim.new(1, 0)
+        onlineCorner.Parent = onlineIndicator
+        
+        local onlineLabel = Instance.new("TextLabel")
+        onlineLabel.Size = UDim2.new(0, 100, 0, 18)
+        onlineLabel.Position = UDim2.new(0, 33, 0, 116)
+        onlineLabel.BackgroundTransparency = 1
+        onlineLabel.Text = "0 Online"
+        onlineLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+        onlineLabel.TextSize = 12
+        onlineLabel.Font = Enum.Font.Gotham
+        onlineLabel.TextXAlignment = Enum.TextXAlignment.Left
+        onlineLabel.Parent = discordFrame
+        
+        local offlineIndicator = Instance.new("Frame")
+        offlineIndicator.Size = UDim2.new(0, 8, 0, 8)
+        offlineIndicator.Position = UDim2.new(0, 135, 0, 120)
+        offlineIndicator.BackgroundColor3 = Color3.fromRGB(116, 127, 141)
+        offlineIndicator.BorderSizePixel = 0
+        offlineIndicator.Parent = discordFrame
+        
+        local offlineCorner = Instance.new("UICorner")
+        offlineCorner.CornerRadius = UDim.new(1, 0)
+        offlineCorner.Parent = offlineIndicator
+        
+        local offlineLabel = Instance.new("TextLabel")
+        offlineLabel.Size = UDim2.new(0, 100, 0, 18)
+        offlineLabel.Position = UDim2.new(0, 148, 0, 116)
+        offlineLabel.BackgroundTransparency = 1
+        offlineLabel.Text = "0 Members"
+        offlineLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+        offlineLabel.TextSize = 12
+        offlineLabel.Font = Enum.Font.Gotham
+        offlineLabel.TextXAlignment = Enum.TextXAlignment.Left
+        offlineLabel.Parent = discordFrame
+        
+        local joinButton = Instance.new("TextButton")
+        joinButton.Size = UDim2.new(1, -40, 0, 35)
+        joinButton.Position = UDim2.new(0, 20, 1, -50)
+        joinButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+        joinButton.BorderSizePixel = 0
+        joinButton.Text = "Join"
+        joinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        joinButton.TextSize = 14
+        joinButton.Font = Enum.Font.GothamBold
+        joinButton.Parent = discordFrame
+        
+        local joinCorner = Instance.new("UICorner")
+        joinCorner.CornerRadius = UDim.new(0, 8)
+        joinCorner.Parent = joinButton
+        
+        local function updateMembers()
+            if config.ApiUrl then
+                task.spawn(function()
+                    local success, data = pcall(function()
+                        return HttpService:JSONDecode(game:HttpGet(config.ApiUrl))
+                    end)
+                    
+                    if success and data then
+                        if data.online then
+                            onlineLabel.Text = tostring(data.online) .. " Online"
+                        end
+                        if data.total then
+                            offlineLabel.Text = tostring(data.total) .. " Members"
+                        end
+                    end
+                end)
+            end
+        end
+        
+        updateMembers()
+        
+        task.spawn(function()
+            while discordFrame and discordFrame.Parent do
+                task.wait(30)
+                updateMembers()
+            end
+        end)
+        
+        joinButton.MouseEnter:Connect(function()
+            tween(joinButton, {BackgroundColor3 = Color3.fromRGB(78, 91, 232)}, 0.15)
+        end)
+        
+        joinButton.MouseLeave:Connect(function()
+            tween(joinButton, {BackgroundColor3 = Color3.fromRGB(88, 101, 242)}, 0.15)
+        end)
+        
+        joinButton.MouseButton1Click:Connect(function()
+            if config.Link then
+                setclipboard(config.Link)
+            end
+            tween(joinButton, {BackgroundColor3 = Color3.fromRGB(68, 81, 222)}, 0.1)
+            task.wait(0.1)
+            tween(joinButton, {BackgroundColor3 = Color3.fromRGB(78, 91, 232)}, 0.1)
+            
+            if config.Callback then
+                config.Callback()
+            end
+        end)
+        
+        makeDraggable(discordFrame, bannerFrame)
+        
+        return discordFrame
+    end
+    
+    window.screenGui = screenGui
+    window.mainFrame = mainFrame
+    window.themeColor = themeColor
+    window.themeColorSecondary = themeColorSecondary
+    window.isGradientTheme = isGradientTheme
+    
+    return window
+end
+
+return CatLib
