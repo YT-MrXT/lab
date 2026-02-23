@@ -216,21 +216,24 @@ tab:AddDiscordInvite({
 # Example of use
 
 ```lua
-local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/realcath/lab/refs/heads/main/libary/catliby"))()
+local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/realcath/lab/refs/heads/main/libary/catlibyz"))()
 
 local window = CatLib:CreateWindow({
 	Title = "My Hub",
 	Subtitle = "By zerozxk",
-	Icon = "rbxassetid://",
+	Icon = "rbxassetid://107996107689218",
 	Size = UDim2.new(0, 500, 0, 300),
-	Theme = "", -- Blue, Red, Yellow, Green, Purple, Orange, Brown, Grey, SpecialCat
-	ColorfulLetters = true, -- Use "true" to enable text color changes according to the theme.
+	Theme = "SpecialCat", -- Blue, Red, Yellow, Green, Purple, Orange, Brown, Grey, SpecialCat, Stormx, Midnight
+	ColorfulLetters = true,
+	ThemeBackground = false, -- true = fundo da janela na cor do tema
+	ThemeTab = false, -- true = fundo da sidebar na cor do tema
 	FloatingButton = {
 		Enabled = true,
-		Icon = "rbxassetid://",
+		Icon = "rbxassetid://107996107689218",
 		Size = UDim2.new(0, 60, 0, 60),
 		Position = UDim2.new(0, 20, 0, 100),
-		Shape = "square"
+		Shape = "square", -- "square" or "circle"
+		-- BackgroundColor = Color3.fromRGB(20, 20, 20) -- omit for transparent background
 	}
 })
 
@@ -238,10 +241,17 @@ local tab = window:CreateTab({
 	Name = "Main",
 	Title = "Main",
 	Subtitle = "Main features",
-	Icon = "rbxassetid://"
+	Icon = "rbxassetid://107996107689218"
 })
 
-tab:AddSection("Settings")
+tab:AddSectionTab()
+
+local tab = window:CreateTab({
+	Name = "Main",
+	Title = "Main",
+	Subtitle = "Main features",
+	Icon = "rbxassetid://107996107689218"
+})
 
 window:Notify({
 	Title = "Welcome!",
@@ -249,12 +259,14 @@ window:Notify({
 	Duration = 5
 })
 
+tab:AddSection("Settings")
+
 tab:AddToggle({
 	Name = "Toggle Example",
 	Description = "This is a toggle with description",
 	Default = false,
 	Callback = function(value)
-		print("Toggle:", value)
+
 	end
 })
 
@@ -263,7 +275,7 @@ tab:AddToggleConfirmation({
 	Description = "Requires confirmation to enable",
 	Default = false,
 	Callback = function(value)
-		print("Toggle Confirmation:", value)
+
 	end
 })
 
@@ -281,7 +293,7 @@ tab:AddButton({
 tab:AddButtonConfirmation({
 	Name = "Button Confirmation",
 	Callback = function()
-		print("Confirmed button clicked!")
+
 	end
 })
 
@@ -290,7 +302,7 @@ tab:AddTextBox({
 	Placeholder = "Enter your name...",
 	Default = "",
 	Callback = function(text)
-		print("TextBox:", text)
+
 	end
 })
 
@@ -300,7 +312,7 @@ tab:AddSlider({
 	Max = 100,
 	Default = 50,
 	Callback = function(value)
-		print("Slider:", value)
+
 	end
 })
 
@@ -309,7 +321,7 @@ tab:AddDropdown({
 	Options = {"Option 1", "Option 2", "Option 3"},
 	Default = "Option 1",
 	Callback = function(option)
-		print("Dropdown:", option)
+
 	end
 })
 
@@ -318,7 +330,7 @@ tab:AddMultiDropdown({
 	Options = {"Item 1", "Item 2", "Item 3"},
 	Default = {},
 	Callback = function(options)
-		print("Multi Dropdown:", table.concat(options, ", "))
+
 	end
 })
 
@@ -327,9 +339,16 @@ tab:AddParagraph({
 	Text = "This is a paragraph with some example text to demonstrate the component."
 })
 
+tab:AddParagraph({
+	Icon = "rbxassetid://107996107689218", -- large icon displayed before title and text
+	Title = "Paragraph with Icon",
+	Text = "This paragraph has a large icon on the left side."
+})
+
 tab:AddDiscordInvite({
-	Icon = "rbxassetid://",
-	ServerName = "My Discord Server",
-	Link = "discord.gg/example"
+    Icon = "rbxassetid://107996107689218",
+    Banner = "rbxassetid://107996107689218", -- opcional
+    ServerName = "Meu Servidor",
+    Link = "discord.gg/exemplo"
 })
 ```
