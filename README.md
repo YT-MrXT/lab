@@ -1,6 +1,6 @@
 # Catlib
 
-- https://discord.gg/cathub
+- https://discord.gg/89Zh8fZ2PZ
 
 <img src="visual/banner.gif" alt="banner">
 
