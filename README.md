@@ -17,7 +17,7 @@ local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrX
 ```lua
 local window = CatLib:CreateWindow({
 	Title = "My Hub",
-	Subtitle = "By zerozxk",
+	Subtitle = "By MrXT",
 	Icon = "rbxassetid://",
 	Size = UDim2.new(0, 500, 0, 300),
 	FloatingButton = {
@@ -216,11 +216,11 @@ tab:AddDiscordInvite({
 # Example of use
 
 ```lua
-local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/realcath/lab/refs/heads/main/cat/libary/catlibz"))()
+local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/catlibz"))()
 
 local window = CatLib:CreateWindow({
 	Title = "My Hub",
-	Subtitle = "By zerozxk",
+	Subtitle = "By MrXT",
 	Icon = "rbxassetid://",
 	Size = UDim2.new(0, 500, 0, 300),
 	FloatingButton = {
