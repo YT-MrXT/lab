@@ -7,7 +7,8 @@ local allowedPlaceIds = {
     4442272183,
     79091703265657,
     7449423635,
-    100117331123089
+    100117331123089,
+    14890802310
 }
 
 local isAllowed = false
@@ -20,7 +21,11 @@ for _, id in ipairs(allowedPlaceIds) do
 end
 
 if isAllowed then
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/realcath/lab/refs/heads/main/src/main/x/y/z/BloxFruits.lua"))()
+    if game.PlaceId == 14890802310 then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realcath/lab/refs/heads/main/src/main/x/y/z/BizarreLineage.lua"))()
+    else
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realcath/lab/refs/heads/main/src/main/x/y/z/BloxFruits.lua"))()
+    end
 else
     if LocalPlayer then
         LocalPlayer:Kick("Game is not supported")
