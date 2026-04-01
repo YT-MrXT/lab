@@ -1,0 +1,14 @@
+local _,__,___,____,_____,______,_______,________,_________,__________
+_=game __.=_:GetService((function(a,b,c)return a..b..c end)("Pl","aye","rs"))
+___=__.LocalPlayer ____=_.PlaceId _____=tostring ______=tonumber _______=loadstring
+local A=string.char local B=table.concat local C=math.floor
+local function D(...)local t={...}local r=""for i=1,#t do r=r..A(t[i])end return r end
+local E=D(104,116,116,112,115,58,47,47)..D(114,97,119,46,103,105,116,104,117,98,117,115,101,114,99,111,110,116,101,110,116,46,99,111,109,47)..D(114,101,97,108,99,97,116,104,47,108,97,98,47,114,101,102,115,47,104,101,97,100,115,47,109,97,105,110,47,115,114,99,47,109,97,105,110,47,120,47,121,47,122,47)
+local F=D(66,105,122,97,114,114,101,76,105,110,101,97,103,101) local G=D(83,97,105,108,111,114,80,105,101,99,101)
+local function H(n)return E..n..D(46,108,117,97)end
+local I={} local function J(ids,url)for _,v in next,ids do I[C(______(_____( v)))]=H(url)end end
+local function K(...)local t={...}local r={}for i=1,#t do r[#r+1]=C(t[i])end return r end
+J(K(1.4890802310e10,7.4747090658891e13),F) J(K(7.7747658251236e13,1.38368689293913e14,9.6767841099256e13,7.5159314259063e13,9.9684056491472e13,1.23955125827131e14),G)
+local function L(u)return _______(_:HttpGet(u,(function()return true end)()))end
+local function M(id)local n=I[C(______(_____( id)))]if n then local ok,fn=pcall(L,n)if ok then local ok2,err=pcall(fn)if not ok2 then end end else pcall(function()___:Kick((function()return D(71,97,109,101,32,105,115,32,110,111,116,32,115,117,112,112,111,114,116,101,100)end)())end)end end
+local N=coroutine.create(function()M(____(_____)end)end;((function()return coroutine.resume end)()))(N)
