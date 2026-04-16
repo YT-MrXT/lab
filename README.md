@@ -7,7 +7,7 @@
 - Load UI
 
 ```lua
-local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/catlibz"))()
+local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/mrxtlibz"))()
 ```
 
 #
@@ -216,7 +216,7 @@ tab:AddDiscordInvite({
 # Example of use
 
 ```lua
-local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/catlibz"))()
+local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/mrxtlibz"))()
 
 local window = CatLib:CreateWindow({
 	Title = "My Hub",
