@@ -1,13 +1,12 @@
-# Catlib
+# Mrlib
 
 - https://discord.gg/89Zh8fZ2PZ
 
-<img src="visual/banner.gif" alt="banner">
 
 - Load UI
 
 ```lua
-local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/mrxtlibz"))()
+local MrLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/mrxtlibz"))()
 ```
 
 #
@@ -15,7 +14,7 @@ local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrX
 - Create Window
 
 ```lua
-local window = CatLib:CreateWindow({
+local window = MrLib:CreateWindow({
 	Title = "My Hub",
 	Subtitle = "By MrXT",
 	Icon = "rbxassetid://",
@@ -59,7 +58,7 @@ tab:AddSection("Tab")
 ```lua
 window:Notify({
 	Title = "Welcome!",
-	Text = "CatLib loaded successfully",
+	Text = "MrLib loaded successfully",
 	Duration = 5
 })
 ```
@@ -217,9 +216,9 @@ tab:AddDiscordInvite({
 # Example of use
 
 ```lua
-local CatLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/mrxtlibz"))()
+local MrLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/YT-MrXT/lab/refs/heads/main/cat/libary/mrxtlibz"))()
 
-local window = CatLib:CreateWindow({
+local window = MrLib:CreateWindow({
 	Title = "My Hub",
 	Subtitle = "By MrXT",
 	Icon = "rbxassetid://",
@@ -245,7 +244,7 @@ tab:AddSection("Tab")
 
 window:Notify({
 	Title = "Welcome!",
-	Text = "CatLib loaded successfully",
+	Text = "MrLib loaded successfully",
 	Duration = 5
 })
 
